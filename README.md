@@ -4,5 +4,5 @@
 
 既存コードの改変・転用をかなり雑に処理してしまったので、後ほど改善する予定です。
 
-googleカレンダーで2018年度板を公開しています。
+googleカレンダーで2018年度版を公開しています。
 https://calendar.google.com/calendar/embed?src=icqe4kvkba0pi1v8fp13sv2j6s%40group.calendar.google.com&ctz=Asia%2FTokyo
