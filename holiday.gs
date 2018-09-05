@@ -421,34 +421,39 @@ Date.prototype.getHolidays = function(year) {
   Date.prototype.getDonichi = function(year) {
     // 戻り値となるオブジェクト
     var ret2 = {};
-
-    //
-    for(var i=0;i<12;i++){
-      var date = new Date(year,i,1);
-      //今月の末日を取得する
-      var lastday = new Date(date.getFullYear(), date.getMonth()+1, 0).getDate();
-      for(var j=1;j<=lastday;j++){
-        date.setDate(j);
-        if(date.getDay() === 6){
-          ret2[date.getFullYear() + "/" +
-               (date.getMonth() + 1) + "/" +
-               date.getDate()] = "土曜日";
-        }
-        else if(date.getDay() === 0){
-          ret2[date.getFullYear() + "/" +
-               (date.getMonth() + 1) + "/" +
-               date.getDate()] = "日曜日";
+    try{
+      // dateの第２引数(月次)は0-11
+      for(var i=0;i<12;i++){
+        var date = new Date(Number(year), i, 1);
+        // 今月の末日を取得する
+        var lastday = new Date(date.getFullYear(), date.getMonth()+1, 0).getDate();
+        // 月初から月末日の範囲で土日を判定
+        for(var j=1;j<=lastday;j++){
+          date.setDate(j);
+          // orで条件を結合すると不明なエラーに見舞われたので仕方なく土日を別個で判別
+          if(date.getDay() === 6){
+            ret2[date.getFullYear() + "/" +
+              (date.getMonth() + 1) + "/" +
+              date.getDate()] = "土曜日";
+          }
+          else if(date.getDay() === 0){
+            ret2[date.getFullYear() + "/" +
+              (date.getMonth() + 1) + "/" +
+              date.getDate()] = "日曜日";
+          }
         }
       }
+      return ret2;
+    }catch(e){
+      Logger.log("西暦として正しい数値を入力してください" + e);
     }
-    return ret2;
   };
 
-  //main.gs
-  //d = new Date();
-  //console.log(d.getDonichi(2018));
-  //var ret = Object.assign(d.getHolidays(2018),d.getDonichi(2018));
-  //console.log(ret);
+//main.gs
+//d = new Date();
+//console.log(d.getDonichi(2018));
+//var ret = Object.assign(d.getHolidays(2018),d.getDonichi(2018));
+//console.log(ret);
 //  for (var key in ret){
 //      console.log(key + " " + new Date(key).getRokuyo(1));
 //  }
