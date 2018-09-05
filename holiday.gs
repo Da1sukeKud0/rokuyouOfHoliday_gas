@@ -1,4 +1,4 @@
-// 
+//
 // Google Apps script
 // Quote:https://qiita.com/hrdaya/items/34ac4ab06a97debb1ffc
 // 上記のソースを雑に改変し土日判定用の関数を追加しました。
@@ -13,13 +13,13 @@ Date.prototype.getHolidays = function(year) {
     "use strict";
     // 戻り値となるオブジェクト
     var ret = {};
-    
+
     // yearは文字列で指定されるかもしれないことを想定して整数に変換しておく
     year = parseInt(year, 10);
-    
+
     // yearが指定されていない場合は今年にする
     year = isNaN(year) ? new Date().getFullYear() : year;
-    
+
     // getHoliday内で使用する定数
     var consts = {
       strFurikae:  "振替休日", // 振替休日用の文字列
@@ -28,8 +28,8 @@ Date.prototype.getHolidays = function(year) {
       dateKokumin: new Date(1985, 11, 27), // 国民の休日の施行日
       strDonichi: "土日", //土曜および日曜用の文字列
     };
-    
-    
+
+
     // getHoliday内で使用するヘルパー関数
     var func = {
       /**
@@ -43,11 +43,11 @@ Date.prototype.getHolidays = function(year) {
         // Array(2).join("0")とvalを結合
         // 出来た文字列の右側から二文字を切り出す
         return (new Array(2).join("0") + val).slice(-2);
-        
+
         // やっていることは下記と同じ
         // return ("0" + val).slice(-2);
       },
-      
+
       /**
       * キーに使用する文字列を返す(yyyy/MM/dd)
       *
@@ -59,7 +59,7 @@ Date.prototype.getHolidays = function(year) {
           this.pad(date.getMonth() + 1) + "/" +
             this.pad(date.getDate());
       },
-      
+
       /**
       * 1月第2月曜日などの移動日の日付にセットする
       *
@@ -71,14 +71,14 @@ Date.prototype.getHolidays = function(year) {
         // 第1回目の日付の取得
         // その月の第1週目の「day」で指定した曜日の日付を取得する
         var days = day - date.getDay() + 1;
-        
+
         // 日付が1より小さい時は「day」で指定した曜日が2週目から始まる
         days += days < 1 ? count * 7 : (count - 1) * 7;
-        
+
         // 取得した日付にセットする
         date.setDate(days);
       },
-      
+
       /**
       * 春分の日の日付にセットする
       * http://www.wikiwand.com/ja/%E6%98%A5%E5%88%86%E3%81%AE%E6%97%A5
@@ -90,7 +90,7 @@ Date.prototype.getHolidays = function(year) {
       setSyunbun: function(date, year) {
         // 年を4で割った時の余り
         var surplus = year % 4;
-        
+
         // 取得する日（範囲外の時はとりあえず20日）
         var day = 20;
         if (1800 <= year && year <= 1827) {
@@ -124,11 +124,11 @@ Date.prototype.getHolidays = function(year) {
         } else if (2188 <= year && year <= 2199) {
           day = 20;
         }
-        
+
         // 取得した日付にセットする
         date.setDate(day);
       },
-      
+
       /**
       * 秋分の日の日付にセットする
       * http://www.wikiwand.com/ja/%E7%A7%8B%E5%88%86%E3%81%AE%E6%97%A5
@@ -140,7 +140,7 @@ Date.prototype.getHolidays = function(year) {
       setSyuubun: function(date, year) {
         // 年を4で割った時の余り
         var surplus = year % 4;
-        
+
         // 取得する日（範囲外の時はとりあえず23日）
         var day = 23;
         if (1800 <= year && year <= 1823) {
@@ -174,11 +174,11 @@ Date.prototype.getHolidays = function(year) {
         } else if (2168 <= year && year <= 2199) {
           day = surplus < 2 ? 22 : 23;
         }
-        
+
         // 取得した日付にセットする
         date.setDate(day);
       },
-      
+
       /**
       * 振替休日を戻り値のオブジェクトにセットする
       *
@@ -194,15 +194,15 @@ Date.prototype.getHolidays = function(year) {
           while (this.inObject(date) || date.getDay() === 0) {
             date.setDate(date.getDate() + 1);
           }
-          
+
           // 戻り値のオブジェクトに値をセット
           this.setObject(date, consts.strFurikae);
         }
       },
-      
+
       /**
       * 国民の休日を戻り値のオブジェクトにセットする
-      * 
+      *
       * 1985年12月27日以降で祝日と祝日に挟まれた平日の場合は挟まれた平日を国民の休日にする
       *
       * @param {Date} date 祝祭日にセットされた日付
@@ -210,12 +210,12 @@ Date.prototype.getHolidays = function(year) {
       setKokumin: function(date) {
         // 日付を二日前にセット
         date.setDate(date.getDate() - 2);
-        
+
         // 1985年12月27日以降の時に二日前に祝日が存在する場合
         if (this.inObject(date) && date >= consts.dateKokumin) {
           // 日付を1日後（祝日と祝日の間の日）に移す
           date.setDate(date.getDate() + 1);
-          
+
           // 挟まれた平日が休日なので該当日が火曜日以降の時に戻り値に値をセットする
           // 該当日が月曜日の場合は振替休日となっている
           // 連続した祝日の時は国民の休日とならないためすでに祝日が含まれているか確認する
@@ -225,7 +225,7 @@ Date.prototype.getHolidays = function(year) {
           }
         }
       },
-      
+
       /**
       * 土曜,日曜を戻り値のオブジェクトにセットする
       *
@@ -238,10 +238,10 @@ Date.prototype.getHolidays = function(year) {
           this.setObject(date, consts.strDonichi);
         }
       },
-      
+
       /**
       * 祝祭日をセットする
-      * 
+      *
       * @param {Date} date 祝祭日の設定に使用するDateオブジェクト
       * @param {Number} year 祝祭日を設定する年
       * @param {Number} month 祝祭日を設定する月
@@ -265,7 +265,7 @@ Date.prototype.getHolidays = function(year) {
             break;
           case "[object String]":
             // 文字列の時の処理
-            if (this.hasOwnProperty(dateVal) && 
+            if (this.hasOwnProperty(dateVal) &&
                 Object.prototype.toString.call(this[dateVal]) === "[object Function]") {
               // 「func」に関数が定義されている時
               this[dateVal](date, year);
@@ -278,14 +278,14 @@ Date.prototype.getHolidays = function(year) {
             // 「holidays」の設定ミスの場合は例外をスローする
             throw new Error("引数のデータ型がおかしいです");
         }
-        
+
         // 戻り値に値をセット
         this.setObject(date, name);
       },
-      
+
       /**
       * 祝祭日を戻り値のオブジェクトにセットする
-      * 
+      *
       * @param {Date} date 祝祭日の設定に使用するDateオブジェクト
       * @param {String} name 祝祭日名
       */
@@ -293,18 +293,18 @@ Date.prototype.getHolidays = function(year) {
         // 戻り値に値をセット
         ret[this.format(date)] = name;
       },
-      
+
       /**
       * 該当する日付が戻り値に存在するかどうか
-      * 
+      *
       * @param {Date} date 存在の確認に使用するDateオブジェクト
-      * @return {Boolean} 
+      * @return {Boolean}
       */
       inObject: function(date) {
         return ret.hasOwnProperty(this.format(date));
       }
     };
-    
+
     /**
     * 祝祭日の配列
     *
@@ -363,13 +363,13 @@ Date.prototype.getHolidays = function(year) {
       [1989, 9999, 12, 23, "天皇誕生日"],
       [1927, 1947, 12, 25, "大正天皇祭"]
     ];
-    
+
     // 日付を1月1日にセットする
     var date = new Date(year, 0, 1);
-    
+
     // ループ用変数
     var i, len;
-    
+
     // holidaysを元に戻り値を作成
     for (i = 0, len = holidays.length; i < len; i++) {
       // 開始年、終了年の間におさまっている場合に祝祭日のオブジェクトを作成
@@ -379,49 +379,49 @@ Date.prototype.getHolidays = function(year) {
           date,               // Dateオブジェクト
           year,               // 年
           holidays[i][2] - 1, // 月（日付のセット用に「-1」）
-          holidays[i][3],     // 日 
+          holidays[i][3],     // 日
           holidays[i][4]      // 祝祭日名
         );
       }
     }
-    
+
     // 戻り値のオブジェクトのキー一覧を取得し並べ替える
     var keys = Object.keys(ret).sort();
-    
+
     // 戻り値の内容から振替休日と国民の休日を設定していく
     for (i = 0, len = keys.length; i < len; i++) {
       // 該当する日付をパースして、ミリ秒の時間を取得
       var parse = Date.parse(keys[i] + " 00:00:00");
-      
+
       // // 日付を再セット
       // date.setTime(parse);
-      
+
       // // 土日の関数実行
       // func.setDonichi(date);
-      
+
       // 日付をセット
       date.setTime(parse);
-      
+
       // 振替休日の関数実行
       func.setFurikae(date);
-      
-      
+
+
       // 日付を再セット
       date.setTime(parse);
-      
+
       // 国民の休日の関数実行
       func.setKokumin(date);
-      
+
     }
-    
+
     // 作成したオブジェクトを返す
     return ret;
   };
-  
+
   Date.prototype.getDonichi = function(year) {
     // 戻り値となるオブジェクト
     var ret2 = {};
-    
+
     //
     for(var i=0;i<12;i++){
       var date = new Date(year,i,1);
@@ -442,7 +442,7 @@ Date.prototype.getHolidays = function(year) {
       }
     }
     return ret2;
-  }; 
+  };
 
   //main.gs
   //d = new Date();
